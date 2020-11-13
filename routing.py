@@ -50,7 +50,8 @@ tested = ""
 distance = 9999
 current_node = ""
 for edge in edges:
-	print(edge)
+	if (edge[SOURCE] == source_node):
+		print(edge)
 	
 # 	if edge[SOURCE] == source_node:
 # 		current_node = source_node
