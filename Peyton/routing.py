@@ -1,16 +1,31 @@
 #!/usr/bin/python3
 
+####################################################
+# Peyton Page and Vivian Carr
+# CSC 450 - Link-State & Distance-Vector Routing
+# Implements Link-State Routing
+# using Dijkstra's Algorithm
+#
+# Implements Distance-Vector Routing
+# using the Bellman-Ford Equation
+#
+# Sources:
+# CSC450 Network Layer P3 Notes & Recorded Lecture
+####################################################
+
+
 import csv
 from sys import argv
-
 import copy
 
-
+# Read file from command line
 TOPOLOGY_FILE = argv[1]
 
+# open file
 with open(TOPOLOGY_FILE, newline='') as topology:
 	fileReader = csv.DictReader(topology)
 
+	# get list of nodes
 	nodes = []
 	rows = []
 	for row in fileReader:
@@ -22,8 +37,7 @@ with open(TOPOLOGY_FILE, newline='') as topology:
 			else:
 				row[key] = int(row[key])
 				
-	i = 0
-
+	# form dictionary of edges
 	connections = {}
 	edges = {}
 	for row in rows:
@@ -34,68 +48,83 @@ with open(TOPOLOGY_FILE, newline='') as topology:
 				
 				edges[key] = value
 
-
 		connections[node] = edges
 		
 		edges = {}
 
-# for route in routes:
-# 	print(f'{route[SOURCE]} -> {route[DESTINATION]} = {route[DISTANCE]}')
+# get user input
 source_node = input("Please, provide the source node: ")
+
+# ensure input is in graph
 if(source_node not in nodes):
 	print(f'{source_node} is not a valid node.')
 	print(f'Choose from the following: {nodes}')
 	exit()
-print(f"Shortest path tree for node {source_node}:")
 
+
+# Initialization
+# N' = {u}
 N_prime = [source_node]
 untested = copy.deepcopy(connections)
 del untested[source_node][source_node]
 
+# Make copy of connections for calculating distances
 distances = copy.deepcopy(connections[source_node])
-path = source_node
-
-# for key, entry in connections.items():
-# 	print(key, entry)
 
 for key, entry in connections[source_node].items():
 	distances[key] = entry
 
+# Create dictionary for forming shortest path trees
+path = {}
+for node in nodes:
+	path[node] = source_node + node
+
+
+# Repeat until all nodes in N'
 while(N_prime != nodes):
+	# Set minimum to the max for finding min
 	minimum = 9999
+	# find w not in N' (untested) such that D(w) is a minimum
 	for key, value in untested[source_node].items():
 		if key in N_prime:
 			pass
 		elif value <= minimum:
 			minimum = value
 			minimum_node = key
+
+
 	# add w to N'
 	N_prime.append(minimum_node)
+	
 	# remove w from untested
-	try:
-		del untested[source_node][minimum_node]
-	except:
-		print('err')
-
+	del untested[source_node][minimum_node]
+	
+	# Sort N_prime for comparison to nodes
 	N_prime.sort()
+
+	# update D(v) for all v adjacent to w and not in N'
 	for node in untested:
-		temp = distances[node]
+		temp = copy.deepcopy(distances[node])
 		distances[node] = min(distances[node], distances[minimum_node] + connections[minimum_node][node])
-		if distances[node] == temp:
-			print('node = ' + node)
-		else:
-			print('minimum_node = ' + minimum_node)
-			
-		
+		# If distance is updated through new path, update the path for that node
+		if(distances[node] != temp):
+			path[node] = path[minimum_node] + node
 
-	print(path)
-	path = source_node
+# Create output string of shortest paths
+print(f"Shortest path tree for node {source_node}:")
+del path[source_node]
+shortest_path = ''	
+for key, value in path.items():
+	shortest_path += f"{value}, "
+shortest_path = shortest_path.rstrip(', ')
+print(shortest_path)
 
-least_cost = ""
 print(f"Costs of the least-cost paths for node {source_node}:")
+# Create output string of cost of least-cost paths
+least_cost = ""
 for key, value in distances.items():
 	least_cost += f"{key}:{value}"
 	least_cost += ', '
-
 least_cost = least_cost.rstrip(', ')	
+# output cost of least_cost paths
 print(least_cost)
