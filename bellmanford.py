@@ -22,11 +22,9 @@ with open(TOPOLOGY_FILE, newline="") as topology:
                 nodes.append(value)
             else:
                 row[key] = int(row[key])
-                
 
     connections = {}
     axis = {}
-
 
     for row in rows:
         for (key, value) in row.items():
@@ -38,34 +36,22 @@ with open(TOPOLOGY_FILE, newline="") as topology:
         axis = {}
 
 
-edges_temp = []
+edges = []
 for i in connections:
     for j in connections[i]:
         if connections[i][j] != 9999 and connections[i][j] != 0:
-            edges_temp.append(sorted([i, j]))
+            edges.append([i, j, connections[i][j]])
 
-edges_temp.sort()    
-edges = list(edges_temp for edges_temp,_ in itertools.groupby(edges_temp))
-
-for i in range(len(edges)):
-    edges[i].append(connections[edges[i][0]][edges[i][1]])
-
-
-
-
-def bellmanford(source, node_list, edge_weights):
+for each in nodes:
     distance = {}
-    predecessor = {}
-    for vertex in node_list:
-        distance[vertex] = 9999
-    distance[source] = 0
 
-    for _ in range(len(node_list) - 1):
-        for u,v,w in edge_weights:
+    for vertex in nodes:
+        distance[vertex] = 9999
+    distance[each] = 0
+
+    for _ in range(len(nodes) - 1):
+        for u, v, w in edges:
             if distance[u] + w < distance[v]:
                 distance[v] = distance[u] + w
-    
-    print(distance)
 
-print(edges)
-bellmanford('u', nodes, edges)
+    print("Distance vector for node", each + ":", *list(distance.values()), sep=" ")
