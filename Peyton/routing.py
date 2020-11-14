@@ -18,6 +18,8 @@ import csv
 from sys import argv
 import copy
 
+
+DEBUG = False
 # Read file from command line
 TOPOLOGY_FILE = argv[1]
 
@@ -128,3 +130,9 @@ for key, value in distances.items():
 least_cost = least_cost.rstrip(', ')	
 # output cost of least_cost paths
 print(least_cost)
+
+if(DEBUG):
+	for source, entry in connections.items():
+		for destination, distance in entry.items():
+			print(f'{source} --> {destination} = {distance}')
+		print()
