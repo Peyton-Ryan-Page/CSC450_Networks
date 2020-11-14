@@ -19,8 +19,6 @@ with open(TOPOLOGY_FILE, newline='') as topology:
         	# print(key, value)
 			if key == "":
 				nodes.append(value)
-			elif value == '9999':
-				del row[key]
 			else:
 				row[key] = int(row[key])
 				
@@ -54,8 +52,8 @@ N_prime = [source_node]
 untested = copy.deepcopy(connections)
 del untested[source_node][source_node]
 
-distances = {}
-
+distances = copy.deepcopy(connections[source_node])
+path = source_node
 
 # for key, entry in connections.items():
 # 	print(key, entry)
@@ -68,17 +66,36 @@ while(N_prime != nodes):
 	for key, value in untested[source_node].items():
 		if key in N_prime:
 			pass
-		elif value < minimum:
+		elif value <= minimum:
 			minimum = value
 			minimum_node = key
-
+	# add w to N'
 	N_prime.append(minimum_node)
-	del untested[source_node][minimum_node]
+	# remove w from untested
+	try:
+		del untested[source_node][minimum_node]
+	except:
+		print('err')
+
 	N_prime.sort()
-
-	distances[node] = min(distances[node], distances[minimum_node] + connections[minimum_node][node])
-
-
+	for node in untested:
+		temp = distances[node]
+		distances[node] = min(distances[node], distances[minimum_node] + connections[minimum_node][node])
+		if distances[node] == temp:
+			print('node = ' + node)
+		else:
+			print('minimum_node = ' + minimum_node)
+			
 		
 
-print(distances)
+	print(path)
+	path = source_node
+
+least_cost = ""
+print(f"Costs of the least-cost paths for node {source_node}:")
+for key, value in distances.items():
+	least_cost += f"{key}:{value}"
+	least_cost += ', '
+
+least_cost = least_cost.rstrip(', ')	
+print(least_cost)
